@@ -7,11 +7,18 @@ Input pl/0 file?   y
 
 2         a := 1;
 
-****         !12
-****         !17
-****         !17
-****         !8
-3         i := 0;
+4         read(n);
 
-3         read(n);
+6         for i := 0 to n - 2 do
 
+14         begin
+
+14             a := (++a) * 2;
+
+22         end;
+
+27         write(a);
+
+30     end;
+
+30 end.

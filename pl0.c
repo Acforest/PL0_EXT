@@ -541,7 +541,7 @@ int getsym()
 * y: instruction.l;
 * z: instruction.a;
 */
-int gen(enum fct x, int y, int z )
+int gen(enum fct x, int y, int z)
 {
 	if (cx >= cxmax)
 	{
@@ -940,12 +940,7 @@ int statement(bool* fsys, int* ptx, int lev)
 		}
 		else
 		{
-			if((table[i].kind != variable) || (table[i].kind != charvar))
-			{
-				error(12);  /* 赋值语句格式错误 */
-				i = 0;
-			}
-			else if (table[i].kind == charvar)	// 类型为字符型 
+			if (table[i].kind == charvar)	// 新增：类型为字符型 
 			{
 				getsymdo;
 				if (sym == becomes)
@@ -967,7 +962,7 @@ int statement(bool* fsys, int* ptx, int lev)
 				}
 				getsymdo;
 			}
-			else	// 类型为变量 
+			else if (table[i].kind == variable)	// 类型为变量 
 			{
 				getsymdo;
 				if(sym == becomes)
@@ -1071,6 +1066,11 @@ int statement(bool* fsys, int* ptx, int lev)
 				}
 				
 			}
+			else
+			{
+				error(12);  /* 赋值语句格式错误 */
+				i = 0;
+			}
 		}//if (i == 0)
 	}
 	else if (sym == plusplus)	// 前++运算 
@@ -1151,7 +1151,7 @@ int statement(bool* fsys, int* ptx, int lev)
         if (sym == ident)
         {
             i = position(id, *ptx);
-            if (i == 0)
+            if (i != 0)
             {
                 if (table[i].kind != variable) // 赋值语句中，赋值号左部标识符属性应是变量
                 {
