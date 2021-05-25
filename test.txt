@@ -1,0 +1,13 @@
+var a, n, i;
+begin
+    begin
+        a := 1;
+        i := 0;
+        read(n);
+        for i := 0 to n - 1 do
+        begin
+            a := (a + 1) * 2;
+        end;
+        write(a);
+    end;
+end.

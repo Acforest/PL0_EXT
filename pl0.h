@@ -11,7 +11,7 @@ typedef enum {
     true
 } bool;
 
-#define norw 13     /* 关键字个数 */
+#define norw 19     /* 关键字个数，从13个增加为19个 */
 #define txmax 100   /* 名字表容量 */
 #define nmax 14     /* number的最大位数 */
 #define al 10       /* 符号的最大长度 */
@@ -20,6 +20,9 @@ typedef enum {
 #define cxmax 500   /* 最多的虚拟机代码数 */
 
 /* 符号 */
+// 新增保留字：else, for, to, downto, return
+// 新增运算符：+=, -=, *=, /=, ++, --
+// 新增注释：/*...*/ 
 enum symbol {
     nul,         ident,     number,     plus,      minus,
     times,       slash,     oddsym,     eql,       neq,
@@ -27,16 +30,20 @@ enum symbol {
     rparen,      comma,     semicolon,  period,    becomes,
     beginsym,    endsym,    ifsym,      thensym,   whilesym,
     writesym,    readsym,   dosym,      callsym,   constsym,
-    varsym,      procsym,
+    varsym,      procsym,	elsesym,	forsym,    tosym,
+    downtosym,	 charsym,	arraysym,	pluseq,	   minuseq,
+    timeseq,	 slasheq,	plusplus,	minusminus,	returnsym
 };
-#define symnum 32
+#define symnum 45   // 符号数从32增加到45
 
 /* 名字表中的类型 */
+// 新增类型：charvar, array
 enum object {
     constant,
     variable,
     procedur,
-    array       //add
+    charvar,	// 新增 
+    array		// 新增 
 };
 
 /* 虚拟机代码 */
@@ -82,7 +89,7 @@ bool facbegsys[symnum];     /* 表示因子开始的符号集合 */
 struct tablestruct
 {
     char name[al];      /* 名字 */
-    enum object kind;   /* 类型：const, var, array or procedure */
+    enum object kind;   /* 类型：const, var, procedure, array or charvar*/
     int val;            /* 数值，仅const使用 */
     int level;          /* 所处层，仅const不使用 */
     int adr;            /* 地址，仅const不使用 */
@@ -108,6 +115,7 @@ int err; /* 错误计数器 */
 #define statementdo(a, b, c)          if(-1 == statement(a, b, c)) return -1
 #define constdeclarationdo(a, b, c)   if(-1 == constdeclaration(a, b, c)) return -1
 #define vardeclarationdo(a, b, c)     if(-1 == vardeclaration(a, b, c)) return -1
+#define chardeclarationdo(a, b, c)    if(-1 == chardeclaration(a, b, c)) return -1		// 新增 
 
 void error(int n);
 int getsym();
@@ -129,6 +137,7 @@ int statement(bool* fsys, int* ptx, int lev);
 void listcode(int cx0);
 int vardeclaration(int* ptx, int lev, int* pdx);
 int constdeclaration(int* ptx, int lev, int* pdx);
+int chardeclaration(int* ptx, int lev, int* pdx);	// 新增 
 int position(char* idt, int tx);
 void enter(enum object k, int* ptx, int lev, int* pdx);
 int base(int l, int* s, int b);

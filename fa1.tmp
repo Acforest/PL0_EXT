@@ -1,0 +1,17 @@
+Input pl/0 file?   y
+0 var a, n, i;
+
+1 begin
+
+2     begin
+
+2         a := 1;
+
+****         !12
+****         !17
+****         !17
+****         !8
+3         i := 0;
+
+3         read(n);
+
