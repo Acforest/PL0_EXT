@@ -18,6 +18,7 @@
 
 #include "pl0.h"
 #include "string.h"
+#pragma warning(disable:4996)
 
 /* 解释执行时使用的栈 */
 #define stacksize 500
@@ -123,48 +124,59 @@ void init()
 	ssym['.'] = period;
 	ssym['#'] = neq;
 	ssym[';'] = semicolon;
+	// 新增 
+	ssym['['] = lbracket;
+	ssym[']'] = rbracket; 
 
 	/* 设置保留字名字，按照字母顺序，便于折半查找 */
-	strcpy(&(word[0][0]), "begin");
-	strcpy(&(word[1][0]), "call");
-	strcpy(&(word[2][0]), "char");		// 新增保留字 char
-	strcpy(&(word[3][0]), "const");
-	strcpy(&(word[4][0]), "do");
-	strcpy(&(word[5][0]), "downto");	// 新增保留字 downto
-	strcpy(&(word[6][0]), "else");		// 新增保留字 else
-	strcpy(&(word[7][0]), "end");
-	strcpy(&(word[8][0]), "for");		// 新增保留字 for 
-	strcpy(&(word[9][0]), "if");
-	strcpy(&(word[10][0]), "odd");
-	strcpy(&(word[11][0]), "procedure");
-	strcpy(&(word[12][0]), "read");
-	strcpy(&(word[13][0]), "return");	// 新增保留字 return
-	strcpy(&(word[14][0]), "then");
-	strcpy(&(word[15][0]), "to");		// 新增保留字 to
-	strcpy(&(word[16][0]), "var");
-	strcpy(&(word[17][0]), "while");
-	strcpy(&(word[18][0]), "write");
+	strcpy(&(word[0][0]), "array");		// 新增保留字 array 
+	strcpy(&(word[1][0]), "begin");
+	strcpy(&(word[2][0]), "break");		// 新增保留字 break 
+	strcpy(&(word[3][0]), "call");
+	strcpy(&(word[4][0]), "const");
+	strcpy(&(word[5][0]), "do");
+	strcpy(&(word[6][0]), "downto");	// 新增保留字 downto
+	strcpy(&(word[7][0]), "else");		// 新增保留字 else
+	strcpy(&(word[8][0]), "end");
+	strcpy(&(word[9][0]), "float");		// 新增保留字 float
+	strcpy(&(word[10][0]), "for");		// 新增保留字 for 
+	strcpy(&(word[11][0]), "if");
+	strcpy(&(word[12][0]), "int");		// 新增保留字 int
+	strcpy(&(word[13][0]), "odd");
+	strcpy(&(word[14][0]), "procedure");
+	strcpy(&(word[15][0]), "read");
+	strcpy(&(word[16][0]), "step");		// 新增保留字 step
+	strcpy(&(word[17][0]), "string");	// 新增保留字 string
+	strcpy(&(word[18][0]), "then");
+	strcpy(&(word[19][0]), "to");		// 新增保留字 to
+	strcpy(&(word[20][0]), "var");
+	strcpy(&(word[21][0]), "while");
+	strcpy(&(word[22][0]), "write");
 
 	/* 设置保留字符号 */
-	wsym[0] = beginsym;
-	wsym[1] = callsym;
-	wsym[2] = charsym;		// 新增保留字符号 charsym 
-	wsym[3] = constsym;
-	wsym[4] = dosym;
-	wsym[5] = downtosym;	// 新增保留字符号 downtosym 
-	wsym[6] = elsesym;		// 新增保留字符号 elsesym 
-	wsym[7] = endsym;
-	wsym[8] = forsym;		// 新增保留字符号 forsym 
-	wsym[9] = ifsym;
-	wsym[10] = oddsym;
-	wsym[11] = procsym;
-	wsym[12] = readsym;
-	wsym[13] = returnsym;	// 新增保留字符号 returnsym 
-	wsym[14] = thensym;
-	wsym[15] = tosym;		// 新增保留字符号 tosym 
-	wsym[16] = varsym;
-	wsym[17] = whilesym;
-	wsym[18] = writesym;
+	wsym[0] = arraysym;		// 新增保留字符号 arraysym 
+	wsym[1] = beginsym;
+	wsym[2] = breaksym;		// 新增保留字符号 breaksym 
+	wsym[3] = callsym;
+	wsym[4] = constsym;
+	wsym[5] = dosym;
+	wsym[6] = downtosym;	// 新增保留字符号 downtosym 
+	wsym[7] = elsesym;		// 新增保留字符号 elsesym 
+	wsym[8] = endsym;
+	wsym[9] = floatsym;		// 新增保留字符号 float 
+	wsym[10] = forsym;		// 新增保留字符号 forsym 
+	wsym[11] = ifsym;
+	wsym[12] = intsym;		// 新增保留字符号 intsym 
+	wsym[13] = oddsym;
+	wsym[14] = procsym;
+	wsym[15] = readsym;
+	wsym[16] = stepsym;		// 新增保留字符号 stepsym
+	wsym[17] = stringsym;	// 新增保留字符号 stringsym 
+	wsym[18] = thensym;
+	wsym[19] = tosym;		// 新增保留字符号 tosym 
+	wsym[20] = varsym;
+	wsym[21] = whilesym;
+	wsym[22] = writesym;
 
 	/* 设置指令名称 */
 	strcpy(&(mnemonic[lit][0]), "lit");
@@ -188,7 +200,8 @@ void init()
 	declbegsys[constsym] = true;
 	declbegsys[varsym] = true;
 	declbegsys[procsym] = true;
-	declbegsys[charsym] = true;		// 新增声明开始符号 charsym 
+	declbegsys[stringsym] = true;	// 新增声明开始符号 stringsym 
+	declbegsys[arraysym] = true;	// 新增声明开始符号 arraysym 
 
 	/* 设置语句开始符号集 */
 	statbegsys[beginsym] = true;
@@ -197,14 +210,17 @@ void init()
 	statbegsys[whilesym] = true;
 	statbegsys[readsym] = true;
 	statbegsys[writesym] = true;
+	statbegsys[forsym] = true;		// 新增语句开始符号 forsym
 
 	/* 设置因子开始符号集 */
 	facbegsys[ident] = true;
 	facbegsys[number] = true;
 	facbegsys[lparen] = true;
-	facbegsys[plusplus] = true;		// 新增因子开始符号plusplus
-	facbegsys[minusminus] = true;	// 新增因子开始符号minusminus
-	facbegsys[charsym] = true;		// 新增因子开始符号charsym
+	facbegsys[plusplus] = true;		// 新增因子开始符号 plusplus
+	facbegsys[minusminus] = true;	// 新增因子开始符号 minusminus
+//	facbegsys[stringsym] = true;	// 新增因子开始符号 stringsym
+//	facbegsys[intsym] = true;		// 新增因子开始符号 intsym
+//	facbegsys[floatsym] = true;		// 新增因子开始符号 floatsym
 }
 
 /*
@@ -364,6 +380,20 @@ int getsym()
 				k++;
 				getchdo;
 			} while (ch>='0' && ch<='9'); /* 获取数字的值 */
+			if (ch == '.') // 新增：判断浮点数
+			{
+				sym = floatsym;
+				float_num = (float)num;
+				getchdo;
+				float tmp = 0.1f;
+				while (ch >= '0' && ch <= '9')
+				{
+					float_num += tmp * (ch - '0');
+					tmp *= 0.1f;
+					k++;
+					getchdo;
+				}
+			} 
 			k--;
 			if (k > nmax)
 			{
@@ -420,12 +450,12 @@ int getsym()
 						getchdo;
 						if (ch == '=')
 						{
-							sym = pluseq;	// 检测到 += 号
+							sym = pluseq;	// 新增：检测到 += 号
 							getchdo;
 						}
 						else if (ch == '+')
 						{
-							sym = plusplus;	// 检测到 ++ 号 
+							sym = plusplus;	// 新增：检测到 ++ 号 
 							getchdo;
 						} 
 						else
@@ -438,12 +468,12 @@ int getsym()
 						getchdo;
 						if (ch == '=')
 						{
-							sym = minuseq;	// 检测到 -= 号
+							sym = minuseq;	// 新增：检测到 -= 号
 							getchdo;
 						}
 						else if (ch == '-')
 						{
-							sym = minusminus;	// 检测到 -- 号 
+							sym = minusminus;	// 新增：检测到 -- 号 
 							getchdo; 
 						} 
 						else
@@ -456,7 +486,7 @@ int getsym()
 						getchdo;
 						if (ch == '=')
 						{
-							sym = timeseq;	// 检测到 *= 号
+							sym = timeseq;	// 新增：检测到 *= 号
 							getchdo;
 						}
 						else
@@ -469,10 +499,10 @@ int getsym()
 						getchdo;
 						if (ch == '=')
 						{
-							sym = slasheq;	// 检测到 /= 号
+							sym = slasheq;	// 新增：检测到 /= 号
 							getchdo;
 						}
-						else if (ch == '*')	// 检测到注释 /*...*/ 
+						else if (ch == '*')	// 新增：检测到注释 /*...*/ 
 						{
 							int flag = 1;
 							char a = 0, b = 0;
@@ -482,6 +512,7 @@ int getsym()
 								else b = ch;
 								getchdo;
 								a = ch;
+								printf("%c", a); 
 								if (a == '/' && b == '*')
 								{
 									flag = 0;
@@ -495,27 +526,19 @@ int getsym()
 							sym = slash;	// 检测到 / 号 
 						}
 					}
-					else if (ch == '\'')	// 检测到字符型 
+					else if (ch == '\'')	// 新增：检测到字符串 
 					{
 						getchdo;
-						if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
+						k = 0;
+						while (ch != '\'')
 						{
-							num = (int)ch;
+							str[k++] = ch;
 							getchdo;
-							if (ch == '\'')
+							if (k > strmax)
 							{
-								sym = charsym;
+								error(99);
+								break;
 							}
-							else
-							{
-								num = 0;
-								sym = nul;
-								error(39);	// 类型错误 
-							}
-						}
-						else
-						{
-							error(39);	// 类型错误 
 						}
 						getchdo;
 					}
@@ -616,9 +639,6 @@ int block(int lev, int tx, bool* fsys)
 		if (sym == constsym)    /* 收到常量声明符号，开始处理常量声明 */
 		{
 			getsymdo;
-
-			/* the original do...while(sym == ident) is problematic, thanks to calculous */
-			/* do { */
 			constdeclarationdo(&tx, lev, &dx);  /* dx的值会被constdeclaration改变，使用指针 */
 			while (sym == comma)
 			{
@@ -633,49 +653,59 @@ int block(int lev, int tx, bool* fsys)
 			{
 				error(5);   /*漏掉了逗号或者分号*/
 			}
-			/* } while (sym == ident); */
 		}
 
 		if (sym == varsym)      /* 收到变量声明符号，开始处理变量声明 */
 		{
 			getsymdo;
-
-			/* the original do...while(sym == ident) is problematic, thanks to calculous */
-			/* do {  */
-			vardeclarationdo(&tx, lev, &dx);
-			while (sym == comma)
+			if (sym == intsym)	// 新增：如果声明为整型数
 			{
 				getsymdo;
 				vardeclarationdo(&tx, lev, &dx);
+				table[tx].type = 0;
+				while (sym == comma)
+				{
+					getsymdo;
+					vardeclarationdo(&tx, lev, &dx);
+					table[tx].type = 0;
+				}
+				if (sym == semicolon)
+				{
+					getsymdo;
+				}
+				else
+				{
+					error(5);
+				}
 			}
-			if (sym == semicolon)
+			else if (sym == floatsym)	// 新增：如果声明为浮点数 
 			{
 				getsymdo;
+				vardeclarationdo(&tx, lev, &dx);
+				table[tx].type = 1;
+				while (sym == comma)
+				{
+					getsymdo;
+					vardeclarationdo(&tx, lev, &dx);
+					table[tx].type = 1;
+				}
+				if (sym == semicolon)
+				{
+					getsymdo;
+				}
+				else
+				{
+					error(5);
+				}
 			}
 			else
 			{
-				error(5);	// 漏掉了逗号或者分号 
+				error(36);	// 未知变量类型声明 
 			}
-			/* } while (sym == ident);  */
 		}
-		
-		if (sym == charsym)		/* 新增：收到字符型声明符号，开始处理字符型声明 */
+		if (sym == stringsym)	/* 新增：收到字符串声明符号，开始处理字符串声明 */
 		{
-			getsymdo;
-			chardeclarationdo(&tx, lev, &dx);
-			while (sym == comma)
-			{
-				getsymdo;
-				chardeclarationdo(&tx, lev, &dx);
-			}
-			if (sym == semicolon)
-			{
-				getsymdo;
-			}
-			else
-			{
-				error(5);	// 漏掉了逗号或者分号 
-			}
+			
 		} 
 
 		while (sym == procsym) /* 收到过程声明符号，开始处理过程声明 */
@@ -735,7 +765,7 @@ int block(int lev, int tx, bool* fsys)
 	if (tableswitch)        /* 输出名字表 */
 	{
 		printf("TABLE:\n");
-		if (tx0+1 > tx)
+		if (tx0 + 1 > tx)
 		{
 			printf("    NULL\n");
 		}
@@ -809,7 +839,7 @@ void enter(enum object k, int* ptx, int lev, int* pdx)
 	case procedur:  /*　过程名字　*/
 		table[(*ptx)].level = lev;
 		break;
-	case charvar:	/* 新增：字符型名字 */ 
+	case string:	/* 新增：字符串名字 */ 
 		table[(*ptx)].level = lev;
 		table[(*ptx)].adr = (*pdx);
 		(*pdx)++;
@@ -931,7 +961,7 @@ int statement(bool* fsys, int* ptx, int lev)
 	int i, cx1, cx2;
 	bool nxtlev[symnum];
 
-	if (sym == ident)   /* 准备按照赋值语句处理 */
+	if (sym == ident)   /* 新增：准备按照赋值语句或变量后++、后--语句处理 */
 	{
 		i = position(id, *ptx);
 		if (i == 0)
@@ -940,16 +970,15 @@ int statement(bool* fsys, int* ptx, int lev)
 		}
 		else
 		{
-			if (table[i].kind == charvar)	// 新增：类型为字符型 
+			if (table[i].kind == string)	// 新增：类型为字符串 
 			{
 				getsymdo;
 				if (sym == becomes)
 				{
 					getsymdo;
-					if (sym == charsym)
+					if (sym == stringsym)
 					{
-						gendo(lit, 0, num);
-						gendo(sto, lev - table[i].level, table[i].adr);
+						
 					}
 					else
 					{
@@ -1007,7 +1036,7 @@ int statement(bool* fsys, int* ptx, int lev)
 					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
 					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
 					{
-						gendo(opr, 0, 6);	// 执行乘法 
+						gendo(opr, 0, 4);	// 执行乘法 
 						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
 						gendo(sto, lev-table[i].level, table[i].adr);
 					}
@@ -1019,7 +1048,7 @@ int statement(bool* fsys, int* ptx, int lev)
 					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
 					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
 					{
-						gendo(opr, 0, 7);	// 执行除法 
+						gendo(opr, 0, 5);	// 执行除法 
 						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
 						gendo(sto, lev-table[i].level, table[i].adr);
 					}
@@ -1062,16 +1091,15 @@ int statement(bool* fsys, int* ptx, int lev)
 				}
 				else
 				{
-					error(13);  /* 没有检测到赋值符号 */
+					error(13);  /* 没有检测到赋值符号、变量后++或变量后--运算 */
 				}
-				
 			}
 			else
 			{
 				error(12);  /* 赋值语句格式错误 */
 				i = 0;
 			}
-		}//if (i == 0)
+		}
 	}
 	else if (sym == plusplus)	// 前++运算 
 	{
@@ -1163,21 +1191,27 @@ int statement(bool* fsys, int* ptx, int lev)
                     getsymdo;
                     if(sym != becomes) error(13);             // 赋值语句左部标识符后应是赋值号:=
                     else getsymdo;
-                    memcpy(nxtlev, fsys, sizeof(bool)*symnum); 
-                    nxtlev[tosym] = true;                     // 后跟符to和downto
+                    memcpy(nxtlev, fsys, sizeof(bool)*symnum);
+                    // 后跟符to和downto
+                    nxtlev[tosym] = true;
                     nxtlev[downtosym] = true;
                     expressiondo(nxtlev, ptx, lev);           // 处理赋值语句右部的表达式a
-                    gendo(sto, lev-table[i].level, table[i].adr);     // 保存初值
-                    switch(sym)
+                    gendo(sto, lev - table[i].level, table[i].adr);     // 保存初值
+                    switch (sym)
                     {
                         case tosym:	// 步长为的向上增加
                             getsymdo;
                             cx1 = cx;	// 保存循环开始点
                             
                             gendo(lod, lev - table[i].level, table[i].adr);	// 将循环判断变量取出放到栈顶
-                            memcpy(nxtlev, fsys, sizeof(bool)*symnum);    	// 处理表达式b 
-                            nxtlev[dosym] = true;                         	// 后跟符do
-                            expressiondo(nxtlev,ptx,lev);
+                            memcpy(nxtlev, fsys, sizeof(bool)*symnum);    	// 处理表达式b
+                            
+//                            nxtlev[step] = true;	// 后跟符step 
+//                            expressiondo(nxtlev, ptx, lev);
+                            
+                            
+                            nxtlev[dosym] = true;          // 后跟符do
+                            expressiondo(nxtlev, ptx, lev);
                             // 判断循环变量条件，如 for i := a to b do S中，判断i是否小于b，如果是则继续循环，否则跳出循环
                             gendo(opr, 0, 13);             // 生成比较指令，i是否小于等于b的值
                             cx2 = cx;                      // 保存循环结束点
@@ -1281,12 +1315,11 @@ int statement(bool* fsys, int* ptx, int lev)
 						gendo(opr, 0, 16);  /* 生成输入指令，读取值到栈顶 */
 						gendo(sto, lev-table[i].level, table[i].adr);   /* 储存到变量 */
 					}
-					else if (table[i].kind == charvar)	// 新增：read()参数表的标识符为字符型 
+					else if (table[i].kind == string)	// 新增：read()参数表的标识符为字符串 
 					{
-						gendo(opr, 0, 19);  /* 生成输入指令，读取值到栈顶 */
-						gendo(sto, lev-table[i].level, table[i].adr);   /* 储存到变量 */
+						
 					}
-					else	// read()参数表的标识符不是变量或字符型 
+					else	// read()参数表的标识符不是变量或字符串 
 					{
 						error(32);
 					}
@@ -1314,17 +1347,14 @@ int statement(bool* fsys, int* ptx, int lev)
 				getsymdo;
 				if (sym == lparen)
 				{
+					// 新增：字符串格式化使出
 					do {
 						getsymdo;
 						memcpy(nxtlev, fsys, sizeof(bool)*symnum);
 						nxtlev[rparen] = true;
 						nxtlev[comma] = true;       /* write的后跟符号为) or , */
 						expressiondo(nxtlev, ptx, lev); /* 调用表达式处理，此处与read不同，read为给变量赋值 */
-						if (table[i].kind == charvar)	// 新增：字符型输出 
-						{
-							gendo(opr, 0, 17);
-						}
-						else gendo(opr, 0, 14);  /* 变量输出，生成输出指令，输出栈顶的值 */
+						gendo(opr, 0, 14);  /* 变量输出，生成输出指令，输出栈顶的值 */
 					} while (sym == comma);
 					if (sym != rparen)
 					{
@@ -1579,8 +1609,8 @@ int factor(bool* fsys, int* ptx, int lev)
 				case procedur:  /* 名字为过程 */
 					error(21);  /* 不能为过程 */
 					break;
-				case charvar:	/* 新增：名字为字符型 */
-					gendo(lod, lev - table[i].level, table[i].adr);	/* 找到字符型地址并将其值入栈 */
+				case string:	/* 新增：名字为字符串 */
+					; 
 				}
 			}
 			getsymdo;

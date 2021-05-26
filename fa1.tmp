@@ -1,5 +1,5 @@
 Input pl/0 file?   y
-0 var a, n, i;
+0 var int a, n, i;
 
 1 begin
 
@@ -13,7 +13,7 @@ Input pl/0 file?   y
 
 14         begin
 
-14             a := (++a) * 2;
+14             a := (++a) * 2;	/* included */
 
 22         end;
 

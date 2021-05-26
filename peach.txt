@@ -1,11 +1,11 @@
-var int a, n, i;
+var a, n, i;
 begin
     begin
         a := 1;
         read(n);
         for i := 0 to n - 2 do
         begin
-            a := (++a) * 2;	/* included */
+            a := (a + 1) * 2;
         end;
         write(a);
     end;

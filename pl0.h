@@ -11,17 +11,18 @@ typedef enum {
     true
 } bool;
 
-#define norw 19     /* 关键字个数，从13个增加为19个 */
+#define norw 23     /* 保留字个数，从13个增加为23个 */
 #define txmax 100   /* 名字表容量 */
 #define nmax 14     /* number的最大位数 */
 #define al 10       /* 符号的最大长度 */
 #define amax 2047   /* 地址上界*/
 #define levmax 3    /* 最大允许过程嵌套声明层数 [0,  levmax]*/
 #define cxmax 500   /* 最多的虚拟机代码数 */
+#define strmax 100  /* 新增：字符串的最大长度 */
 
-/* 符号 */
+/* 符号 */ 
 // 新增保留字：else, for, to, downto, return
-// 新增运算符：+=, -=, *=, /=, ++, --
+// 新增运算符：+=, -=, *=, /=, ++, --, []
 // 新增注释：/*...*/ 
 enum symbol {
     nul,         ident,     number,     plus,      minus,
@@ -30,11 +31,54 @@ enum symbol {
     rparen,      comma,     semicolon,  period,    becomes,
     beginsym,    endsym,    ifsym,      thensym,   whilesym,
     writesym,    readsym,   dosym,      callsym,   constsym,
-    varsym,      procsym,	elsesym,	forsym,    tosym,
-    downtosym,	 charsym,	arraysym,	pluseq,	   minuseq,
-    timeseq,	 slasheq,	plusplus,	minusminus,	returnsym
+    varsym,      procsym,
+    // 新增 
+	elsesym,	 breaksym,
+	forsym,    	 tosym,		downtosym,	stepsym,
+	stringsym,	 arraysym,	intsym,		floatsym,
+	pluseq,		 minuseq,	timeseq,	slasheq,   plusplus,	minusminus,
+    lbracket,	 rbracket,	
 };
-#define symnum 45   // 符号数从32增加到45
+#define symnum 50   // 符号数从32增加到50
+
+const char* error_msg[] = {
+	"",
+	"把:=写成了=",//1 
+	"常量声明=后应是一个数字",//2
+    "常量说明标识后应是=",//3
+    "const后应是标识",//4
+    "漏掉了,或;",//5
+    "过程名错误！",//6
+    "需要声明",//7
+    "声明后边是一个不正确的符号",//8
+    "少了'.'，程序无法正常结束",//9
+    "少了';'",//10
+    "发现未声明的标识符！",//11
+    "非法赋值",//12
+    "少了':='",//13
+    "call之后缺少标识符！",//14
+    "call之后标识符不是过程！",//15
+    "少了then",//16
+    "缺少';'或者end",//17
+    "少了do",//18
+    "符号错误",//19
+    "条件语句中未发现操作符（“#，>”等）",//20
+    "不能把过程的标识符放在表达式里！",//21
+    "单引号后未跟单引号，词法分析出错！",//22
+    "符号后面不能跟着<因子>",//23
+    "符号不能作为<表达式>的开始！",//24
+    "数组声明有误",//25
+    "write里面不是表达式或字符串！",//26
+    "break未写在循环中！",//27
+    "for语句缺少step或until!",//28
+    "for 语句循环变量类型错误！",//29
+    "数字过大！",//30
+    "常量超过可定义的最大值！",//31
+    "超过允许的最大嵌套层数，层数太多啦！",//32
+    "格式错误，应是右括号')'",//33
+    "格式错误，应是左括号'('",//34
+    "read里不是标识符ID,或该标识符未声明",//35
+};
 
 /* 名字表中的类型 */
 // 新增类型：charvar, array
@@ -42,7 +86,7 @@ enum object {
     constant,
     variable,
     procedur,
-    charvar,	// 新增 
+    string,		// 新增 
     array		// 新增 
 };
 
@@ -72,7 +116,8 @@ char ch;            /* 获取字符的缓冲区，getch 使用 */
 enum symbol sym;    /* 当前的符号 */
 char id[al+1];      /* 当前ident, 多出的一个字节用于存放0 */
 int num;            /* 当前number */
-int cc, ll;          /* getch使用的计数器，cc表示当前字符(ch)的位置 */
+float float_num;	/* 新增：当前float number */
+int cc, ll;         /* getch使用的计数器，cc表示当前字符(ch)的位置 */
 int cx;             /* 虚拟机代码指针, 取值范围[0, cxmax-1]*/
 char line[81];      /* 读取行缓冲区 */
 char a[al+1];       /* 临时符号, 多出的一个字节用于存放0 */
@@ -84,16 +129,19 @@ char mnemonic[fctnum][5];   /* 虚拟机代码指令名称 */
 bool declbegsys[symnum];    /* 表示声明开始的符号集合 */
 bool statbegsys[symnum];    /* 表示语句开始的符号集合 */
 bool facbegsys[symnum];     /* 表示因子开始的符号集合 */
+char str[strmax];			/* 新增：字符串 */ 
 
 /* 名字表结构 */
 struct tablestruct
 {
     char name[al];      /* 名字 */
-    enum object kind;   /* 类型：const, var, procedure, array or charvar*/
-    int val;            /* 数值，仅const使用 */
+    enum object kind;   /* 类型：const, var, procedure, array or string */
+    int val;            /* 整型数值，仅const使用 */
+    float fval;			/* 新增：浮点型数值，仅const使用 */ 
     int level;          /* 所处层，仅const不使用 */
     int adr;            /* 地址，仅const不使用 */
     int size;           /* 需要分配的数据区空间, 仅procedure使用 */
+    int type;			/* 新增：数值类型，整型数为 0，浮点数为 1 */ 
 };
 
 struct tablestruct table[txmax]; /* 名字表 */
