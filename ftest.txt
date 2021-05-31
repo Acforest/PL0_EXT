@@ -1,0 +1,13 @@
+var int n, i;
+var float f;
+begin
+    begin
+        f := 1.2;
+        read(n);
+        for i := 0 to n - 2 do
+        begin
+            f += 2;
+        end;
+        write(f);
+    end;
+end.

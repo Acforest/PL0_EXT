@@ -13,16 +13,11 @@
  * fa2.tmp输出结?
  * fas.tmp输出名字表
  */
-
-#include <stdio.h>
-
+#include <stdio.h> 
+#include <iostream>
+#include <cstring>
+#include <algorithm>
 #include "pl0.h"
-#include "string.h"
-#pragma warning(disable:4996)
-
-/* 解释执行时使用的栈 */
-#define stacksize 500
-
 
 int main()
 {
@@ -218,9 +213,9 @@ void init()
 	facbegsys[lparen] = true;
 	facbegsys[plusplus] = true;		// 新增因子开始符号 plusplus
 	facbegsys[minusminus] = true;	// 新增因子开始符号 minusminus
-//	facbegsys[stringsym] = true;	// 新增因子开始符号 stringsym
-//	facbegsys[intsym] = true;		// 新增因子开始符号 intsym
-//	facbegsys[floatsym] = true;		// 新增因子开始符号 floatsym
+	//facbegsys[stringsym] = true;	// 新增因子开始符号 stringsym
+	//facbegsys[intsym] = true;		// 新增因子开始符号 intsym
+	//facbegsys[floatsym] = true;		// 新增因子开始符号 floatsym
 }
 
 /*
@@ -376,19 +371,18 @@ int getsym()
 			num = 0;
 			sym = number;
 			do {
-				num = 10*num + ch - '0';
+				num = 10 * num + ch - '0';
 				k++;
 				getchdo;
 			} while (ch>='0' && ch<='9'); /* 获取数字的值 */
 			if (ch == '.') // 新增：判断浮点数
 			{
 				sym = floatsym;
-				float_num = (float)num;
-				getchdo;
 				float tmp = 0.1f;
+				getchdo;
 				while (ch >= '0' && ch <= '9')
 				{
-					float_num += tmp * (ch - '0');
+					num += tmp * (ch - '0');
 					tmp *= 0.1f;
 					k++;
 					getchdo;
@@ -526,19 +520,14 @@ int getsym()
 							sym = slash;	// 检测到 / 号 
 						}
 					}
-					else if (ch == '\'')	// 新增：检测到字符串 
+					else if (ch == '"')	// 新增：检测到字符串 
 					{
 						getchdo;
-						k = 0;
-						while (ch != '\'')
+						std::string tmp = "";
+						while (ch != '"')
 						{
-							str[k++] = ch;
+							tmp += ch;
 							getchdo;
-							if (k > strmax)
-							{
-								error(99);
-								break;
-							}
 						}
 						getchdo;
 					}
@@ -564,7 +553,9 @@ int getsym()
 * y: instruction.l;
 * z: instruction.a;
 */
-int gen(enum fct x, int y, int z)
+// 新增：模板类用于处理整型数和浮点数 
+template <typename T>
+int gen(enum fct x, int y, T z)
 {
 	if (cx >= cxmax)
 	{
@@ -751,9 +742,10 @@ int block(int lev, int tx, bool* fsys)
 				error(5);   /* 漏掉了分号 */
 			}
 		}
-		memcpy(nxtlev, statbegsys, sizeof(bool)*symnum);
-		nxtlev[ident] = true;
-		testdo(nxtlev, declbegsys, 7);
+		// 注释掉，以便声明不同类型的变量 
+//		memcpy(nxtlev, statbegsys, sizeof(bool)*symnum);
+//		nxtlev[ident] = true;
+//		testdo(nxtlev, declbegsys, 7);
 	} while (inset(sym, declbegsys));   /* 直到没有声明符号 */
 
 	code[table[tx0].adr].a = cx;    /* 开始生成当前过程代码 */
@@ -767,29 +759,29 @@ int block(int lev, int tx, bool* fsys)
 		printf("TABLE:\n");
 		if (tx0 + 1 > tx)
 		{
-			printf("    NULL\n");
+			printf("NULL\n");
 		}
 		for (i=tx0+1; i<=tx; i++)
 		{
 			switch (table[i].kind)
 			{
 			case constant:
-				printf("    %d const %s ", i, table[i].name);
+				printf("%d\tconst\t%s\t", i, table[i].name);
 				printf("val=%d\n", table[i].val);
-				fprintf(fas, "    %d const %s ", i, table[i].name);
+				fprintf(fas, "%d\tconst\t%s\t", i, table[i].name);
 				fprintf(fas, "val=%d\n", table[i].val);
 				break;
 			case variable:
-				printf("    %d var   %s ", i, table[i].name);
-				printf("lev=%d addr=%d\n", table[i].level, table[i].adr);
-				fprintf(fas, "    %d var   %s ", i, table[i].name);
-				fprintf(fas, "lev=%d addr=%d\n", table[i].level, table[i].adr);
+				printf("%d\tvar\t%s\t", i, table[i].name);
+				printf("lev=%d\taddr=%d\n", table[i].level, table[i].adr);
+				fprintf(fas, "%d\tvar\t%s\t", i, table[i].name);
+				fprintf(fas, "lev=%d\taddr=%d\n", table[i].level, table[i].adr);
 				break;
 			case procedur:
-				printf("    %d proc  %s ", i, table[i].name);
-				printf("lev=%d addr=%d size=%d\n", table[i].level, table[i].adr, table[i].size);
-				fprintf(fas,"    %d proc  %s ", i, table[i].name);
-				fprintf(fas,"lev=%d addr=%d size=%d\n", table[i].level, table[i].adr, table[i].size);
+				printf("%d\tproc\t%s\t", i, table[i].name);
+				printf("lev=%d\taddr=%d size=%d\n", table[i].level, table[i].adr, table[i].size);
+				fprintf(fas,"%d\tproc\t%s\t", i, table[i].name);
+				fprintf(fas,"lev=%d\taddr=%d\tsize=%d\n", table[i].level, table[i].adr, table[i].size);
 				break;
 			}
 		}
@@ -839,7 +831,7 @@ void enter(enum object k, int* ptx, int lev, int* pdx)
 	case procedur:  /*　过程名字　*/
 		table[(*ptx)].level = lev;
 		break;
-	case string:	/* 新增：字符串名字 */ 
+	case string:		/* 新增：字符串名字 */ 
 		table[(*ptx)].level = lev;
 		table[(*ptx)].adr = (*pdx);
 		(*pdx)++;
@@ -1303,7 +1295,7 @@ int statement(bool* fsys, int* ptx, int lev)
 					}
 					else
 					{
-						i=0;
+						i = 0;
 					}
 
 					if (i == 0)
@@ -1317,7 +1309,35 @@ int statement(bool* fsys, int* ptx, int lev)
 					}
 					else if (table[i].kind == string)	// 新增：read()参数表的标识符为字符串 
 					{
-						
+						for (int k = 0; k < format_str.size(); k++)
+						{
+							if (format_str[k] == '%') // 新增：如果读取到 % 
+							{
+								if (k + 1 < format_str.size() && format_str[k + 1] == 'd') // 判断整型数格式化输出 
+								{
+									
+								}
+								else if (k + 1 < format_str.size() && format_str[k + 1] == 'f') // 判断默认保留2位浮点数格式化输出 
+								{
+									
+								}
+								else if (k + 1 < format_str.size() && format_str[k + 1] == '.') // 判断指定浮点位数格式化输出 
+								{
+									if (k + 2 < format_str.size() && format_str[k + 2] >= '0' && format_str[k + 2] <= '0' + fprecision) // 如果在最小精度范围内 
+									{
+										
+									}
+									else // 浮点数超出精度范围错误 
+									{
+										
+									}
+								}
+								else
+								{
+									error(77); // 浮点数格式错误 
+								}
+							}
+						}
 					}
 					else	// read()参数表的标识符不是变量或字符串 
 					{
@@ -1610,7 +1630,7 @@ int factor(bool* fsys, int* ptx, int lev)
 					error(21);  /* 不能为过程 */
 					break;
 				case string:	/* 新增：名字为字符串 */
-					; 
+					;
 				}
 			}
 			getsymdo;
@@ -1794,8 +1814,8 @@ int condition(bool* fsys, int* ptx, int lev)
 void interpret()
 {
 	int p, b, t;    /* 指令指针，指令基址，栈顶指针 */
-	struct instruction i;   /* 存放当前指令 */
-	int s[stacksize];   /* 栈 */
+	instruction i;   /* 存放当前指令 */
+	float s[stacksize];   /* 改进：浮点数和整型数都可以存放的栈 */
 
 	printf("start pl0\n");
 	t = 0;
@@ -1839,7 +1859,7 @@ void interpret()
 				s[t-1] = s[t-1]/s[t];
 				break;
 			case 6:
-				s[t-1] = s[t-1]%2;
+				s[t-1] = (int)s[t-1] % 2;	// 新增：将浮点数转为整型数 
 				break;
 			case 8:
 				t--;
@@ -1865,34 +1885,31 @@ void interpret()
 				t--;
 				s[t-1] = (s[t-1] <= s[t]);
 				break;
-			case 14:
-				printf("%d", s[t-1]);
-				fprintf(fa2, "%d", s[t-1]);
+			case 14:	// 改进：将float转int 
+				printf("%f", s[t-1]);
+				fprintf(fa2, "%f", s[t-1]);
 				t--;
 				break;
 			case 15:
 				printf("\n");
 				fprintf(fa2,"\n");
 				break;
-			case 16:
+			case 16:	// 改进：将int转float
 				printf("?");
 				fprintf(fa2, "?");
-				scanf("%d", &(s[t]));
-				fprintf(fa2, "%d\n", s[t]);
+				scanf("%lf", &(s[t]));
+				fprintf(fa2, "%lf\n", s[t]);
 				t++;
 				break;
-			case 17:	// 新增：输出栈顶字符型操作
-                printf("%c\n", s[t-1]);	// 输出栈顶值
-                fprintf(fa2, "%c\n", s[t-1]);	// 同时打印到文件
-                t--;	// 栈顶下移
+			case 17:	// 新增：输出字符串栈顶的字符串操作
+                printf("%s\n", format_str.c_str());	// 输出栈顶值
+                fprintf(fa2, "%s\n", format_str.c_str());	// 同时打印到文件
                 break;
-
             case 18:	// 新增：输出栈顶浮点值操作
-                printf("%lf", s[t-1]);	// 输出栈顶值
-                fprintf(fa2, "%lf\n", s[t-1]);	// 同时打印到文件
+                printf("%f", s[t-1]);	// 输出栈顶值
+                fprintf(fa2, "%f\n", s[t-1]);	// 同时打印到文件
                 t--; // 栈顶下移
                 break;
-
             case 19:	// 新增：接受键盘值输入到栈顶
                 printf("输入单字符:");
                 fprintf(fa2, "输入单字符:");
@@ -1901,7 +1918,6 @@ void interpret()
                 fprintf(fa2, "%c\n", s[t]);
                 t++; // 栈顶上移，分配空间
                 break;
-
             case 20://20号操作是接受键盘值输入到栈顶
                 printf("输入浮点数：");
                 fprintf(fa2, "输入浮点数：");
@@ -1912,7 +1928,7 @@ void interpret()
 			}
 			break;
 		case lod:   /* 取相对当前过程的数据基地址为a的内存的值到栈顶 */
-			s[t] = s[base(i.l,s,b)+i.a];
+			s[t] = s[base(i.l, s, b) + i.a];
 			t++;
 			break;
 		case sto:   /* 栈顶的值存到相对当前过程的数据基地址为a的内存 */
@@ -1944,7 +1960,7 @@ void interpret()
 }
 
 /* 通过过程基址求上l层过程的基址 */
-int base(int l, int* s, int b)
+int base(int l, float* s, int b)
 {
 	int b1;
 	b1 = b;
