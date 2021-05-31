@@ -11,19 +11,19 @@
 //    true
 //} bool;
 
-#define norw 23     /* 保留字个数，从13个增加为23个 */
 #define txmax 100   /* 名字表容量 */
 #define nmax 14     /* number的最大位数 */
 #define al 10       /* 符号的最大长度 */
 #define amax 2047   /* 地址上界*/
 #define levmax 3    /* 最大允许过程嵌套声明层数 [0,  levmax]*/
 #define cxmax 500   /* 最多的虚拟机代码数 */
-#define strmax 100  /* 新增：字符串的最大长度 */
 
 /* 符号 */ 
 // 新增保留字：else, for, to, downto, return
 // 新增运算符：+=, -=, *=, /=, ++, --, []
-// 新增注释：/*...*/ 
+// 新增注释：/*...*/
+#define norw 23     /* 保留字个数，从13个增加为23个 */
+#define symnum 50   // 符号数从32增加到50
 enum symbol {
     nul,         ident,     number,     plus,      minus,
     times,       slash,     oddsym,     eql,       neq,
@@ -39,45 +39,45 @@ enum symbol {
 	pluseq,		 minuseq,	timeseq,	slasheq,   plusplus,	minusminus,
     lbracket,	 rbracket,	
 };
-#define symnum 50   // 符号数从32增加到50
 
 const char* error_msg[] = {
 	"",
 	"把:=写成了=",//1 
-	"常量声明=后应是一个数字",//2
+	"常量声明=后应是数字",//2
     "常量说明标识后应是=",//3
     "const后应是标识",//4
     "漏掉了,或;",//5
-    "过程名错误！",//6
-    "需要声明",//7
-    "声明后边是一个不正确的符号",//8
-    "少了'.'，程序无法正常结束",//9
-    "少了';'",//10
-    "发现未声明的标识符！",//11
-    "非法赋值",//12
-    "少了':='",//13
-    "call之后缺少标识符！",//14
-    "call之后标识符不是过程！",//15
-    "少了then",//16
-    "缺少';'或者end",//17
-    "少了do",//18
-    "符号错误",//19
-    "条件语句中未发现操作符（“#，>”等）",//20
-    "不能把过程的标识符放在表达式里！",//21
-    "单引号后未跟单引号，词法分析出错！",//22
-    "符号后面不能跟着<因子>",//23
-    "符号不能作为<表达式>的开始！",//24
-    "数组声明有误",//25
-    "write里面不是表达式或字符串！",//26
+    "过程名错误",//6
+    "",//7
+    "语句后跟符号错误",//8
+    "程序末尾缺少.",//9
+    "语句末尾缺少;",//10
+    "标识符未声明",//11
+    "非法的赋值类型",//12
+    "没有检测到赋值符号:=、变量后++或变量后--运算",//13
+    "call后缺少标识符",//14
+    "call后标识符不是过程",//15
+    "缺少then",//16
+    "缺少end或;",//17
+    "缺少do",//18
+    "非变量使用了赋值或++、--运算",//19
+    "条件处理语句中没有检测到逻辑运算符",//20
+    "表达式中不能出现无返回值的过程",//21
+    "缺少)",//22
+    "因子后有非法符号",//23
+    "表达式的开始符为非法符号",//24
+    "",//25
+    "",//26
     "break未写在循环中！",//27
     "for语句缺少step或until!",//28
-    "for 语句循环变量类型错误！",//29
-    "数字过大！",//30
-    "常量超过可定义的最大值！",//31
-    "超过允许的最大嵌套层数，层数太多啦！",//32
-    "格式错误，应是右括号')'",//33
-    "格式错误，应是左括号'('",//34
-    "read里不是标识符ID,或该标识符未声明",//35
+    "for语句缺少do",//29
+    "整型变量超出范围",//30
+    "整形常量超出范围",//31
+    "超出最大嵌套层数",//32
+    "read()或write()函数调用缺少)",//33
+    "read()或write()函数调用缺少(",//34
+    "read()函数中应是声明过的变量名",//35
+    "变量声明不为int或float",//36
 };
 
 /* 名字表中的类型 */
@@ -91,12 +91,12 @@ enum object {
 };
 
 /* 虚拟机代码 */
+#define fctnum 8
 enum fct {
     lit,     opr,     lod,
     sto,     cal,     inte,
     jmp,     jpc,
 };
-#define fctnum 8
 
 /* 虚拟机代码结构 */
 struct instruction
@@ -128,7 +128,7 @@ char mnemonic[fctnum][5];   /* 虚拟机代码指令名称 */
 bool declbegsys[symnum];    /* 表示声明开始的符号集合 */
 bool statbegsys[symnum];    /* 表示语句开始的符号集合 */
 bool facbegsys[symnum];     /* 表示因子开始的符号集合 */
-char str[strmax];			/* 新增：字符串 */ 
+std::string str;			/* 新增：字符串 */ 
 
 /* 名字表结构 */
 struct tablestruct
@@ -162,7 +162,7 @@ int err; /* 错误计数器 */
 #define statementdo(a, b, c)          if(-1 == statement(a, b, c)) return -1
 #define constdeclarationdo(a, b, c)   if(-1 == constdeclaration(a, b, c)) return -1
 #define vardeclarationdo(a, b, c)     if(-1 == vardeclaration(a, b, c)) return -1
-#define chardeclarationdo(a, b, c)    if(-1 == chardeclaration(a, b, c)) return -1		// 新增 
+#define arraydeclarationdo(a, b, c)     if(-1 == arraydeclaration(a, b, c)) return -1		// 新增 
 
 void error(int n);
 int getsym();

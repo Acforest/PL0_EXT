@@ -15,7 +15,8 @@
  */
 
 #include <stdio.h>
-
+#include <iostream>
+#include <cstring>
 #include "pl0.h"
 #include "string.h"
 #pragma warning(disable:4996)
@@ -271,8 +272,8 @@ void error(int n)
 
 	space[cc-1]=0; //出错时当前符号已经读完，所以cc-1
 
-	printf("****%s!%d\n", space, n);
-	fprintf(fa1,"****%s!%d\n", space, n);
+	printf("%s!%s: %d\n", space, n, error_msg[n]);
+	fprintf(fa1,"%s!%s: %d\n", space, n, error_msg[n]);
 
 	err++;
 }
@@ -392,9 +393,12 @@ int getsym()
 					k++;
 					getchdo;
 				}
-			} 
-			k--;
-			if (k > nmax)
+			}
+			//else { // 否则识别为整型数
+			//	sym = intsym;
+			//}
+			//k--;
+			if (k > nmax && sym == intsym) // 如果整型变量超出范围
 			{
 				error(30);
 			}
@@ -525,19 +529,14 @@ int getsym()
 							sym = slash;	// 检测到 / 号 
 						}
 					}
-					else if (ch == '\'')	// 新增：检测到字符串 
+					else if (ch == '"')	// 新增：检测到字符串 
 					{
 						getchdo;
 						k = 0;
-						while (ch != '\'')
+						while (ch != '"')
 						{
-							str[k++] = ch;
+							str += ch;
 							getchdo;
-							if (k > strmax)
-							{
-								error(99);
-								break;
-							}
 						}
 						getchdo;
 					}
@@ -921,19 +920,10 @@ int vardeclaration(int* ptx,int lev,int* pdx)
 }
 
 /*
-* 新增：字符型声明处理
+* 新增：字符串声明处理
 */
-int chardeclaration(int* ptx, int lev, int* pdx)
+int arraydeclaration(int* ptx, int lev, int* pdx)
 {
-	if (sym == ident)
-	{
-		enter(variable, ptx, lev, pdx); // 填写名字表
-		getsymdo;
-	}
-	else
-	{
-		error(4);   /* var后应是标识 */
-	}
 	return 0;
 }
 
@@ -970,28 +960,28 @@ int statement(bool* fsys, int* ptx, int lev)
 		}
 		else
 		{
-			if (table[i].kind == string)	// 新增：类型为字符串 
-			{
-				getsymdo;
-				if (sym == becomes)
-				{
-					getsymdo;
-					if (sym == stringsym)
-					{
-						
-					}
-					else
-					{
-						error(32);
-					}
-				}
-				else
-				{
-					error(13);
-				}
-				getsymdo;
-			}
-			else if (table[i].kind == variable)	// 类型为变量 
+			//if (table[i].kind == string)	// 新增：类型为字符串 
+			//{
+			//	getsymdo;
+			//	if (sym == becomes)
+			//	{
+			//		getsymdo;
+			//		if (sym == stringsym)
+			//		{
+			//			
+			//		}
+			//		else
+			//		{
+			//			error(32);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		error(13);
+			//	}
+			//	getsymdo;
+			//}
+			if (table[i].kind == variable)	// 类型为变量 
 			{
 				getsymdo;
 				if(sym == becomes)
@@ -1096,7 +1086,7 @@ int statement(bool* fsys, int* ptx, int lev)
 			}
 			else
 			{
-				error(12);  /* 赋值语句格式错误 */
+				error(12);  /* 非法的赋值类型 */
 				i = 0;
 			}
 		}
@@ -1660,7 +1650,7 @@ int factor(bool* fsys, int* ptx, int lev)
 				}
 				else
 				{
-					error(11);
+					error(11); /* 标识符未声明 */
 				}
 			}
 		}
