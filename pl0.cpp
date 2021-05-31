@@ -28,7 +28,7 @@ int main()
 {
 	bool nxtlev[symnum];
 
-	printf("Input pl/0 file?   ");
+	printf("Input pl/0 file?\t");
 	scanf("%s", fname);     /* 输入文件名 */
 
 	fin = fopen(fname, "r");
@@ -383,12 +383,11 @@ int getsym()
 			if (ch == '.') // 新增：判断浮点数
 			{
 				sym = floatsym;
-				float_num = (float)num;
 				getchdo;
 				float tmp = 0.1f;
 				while (ch >= '0' && ch <= '9')
 				{
-					float_num += tmp * (ch - '0');
+					num += tmp * (ch - '0');
 					tmp *= 0.1f;
 					k++;
 					getchdo;
@@ -751,9 +750,10 @@ int block(int lev, int tx, bool* fsys)
 				error(5);   /* 漏掉了分号 */
 			}
 		}
-		memcpy(nxtlev, statbegsys, sizeof(bool)*symnum);
-		nxtlev[ident] = true;
-		testdo(nxtlev, declbegsys, 7);
+		// 注释掉是因为要声明整型数和浮点数 
+//		memcpy(nxtlev, statbegsys, sizeof(bool)*symnum);
+//		nxtlev[ident] = true;
+//		testdo(nxtlev, declbegsys, 7);
 	} while (inset(sym, declbegsys));   /* 直到没有声明符号 */
 
 	code[table[tx0].adr].a = cx;    /* 开始生成当前过程代码 */
@@ -1005,54 +1005,54 @@ int statement(bool* fsys, int* ptx, int lev)
 						gendo(sto, lev-table[i].level, table[i].adr);
 					}
 				}
-				else if (sym == pluseq)	// +=运算 
-				{
-					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool)*symnum);
-					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
-					{
-						gendo(opr, 0, 2);	// 执行加法 
-						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-						gendo(sto, lev-table[i].level, table[i].adr);
-					}
-				}
-				else if (sym == minuseq)	// -=运算 
-				{
-					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool)*symnum);
-					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
-					{
-						gendo(opr, 0, 3);	// 执行减法 
-						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-						gendo(sto, lev-table[i].level, table[i].adr);
-					}
-				}
-				else if (sym == timeseq)	// *=运算 
-				{
-					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool)*symnum);
-					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
-					{
-						gendo(opr, 0, 4);	// 执行乘法 
-						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-						gendo(sto, lev-table[i].level, table[i].adr);
-					}
-				}
-				else if (sym == slasheq)	// /=运算 
-				{
-					getsymdo;
-					memcpy(nxtlev, fsys, sizeof(bool)*symnum);
-					expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
-					if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
-					{
-						gendo(opr, 0, 5);	// 执行除法 
-						/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
-						gendo(sto, lev-table[i].level, table[i].adr);
-					}
-				}
+				//else if (sym == pluseq)	// +=运算 
+				//{
+				//	getsymdo;
+				//	memcpy(nxtlev, fsys, sizeof(bool)*symnum);
+				//	expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+				//	if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
+				//	{
+				//		gendo(opr, 0, 2);	// 执行加法 
+				//		/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+				//		gendo(sto, lev-table[i].level, table[i].adr);
+				//	}
+				//}
+				//else if (sym == minuseq)	// -=运算 
+				//{
+				//	getsymdo;
+				//	memcpy(nxtlev, fsys, sizeof(bool)*symnum);
+				//	expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+				//	if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
+				//	{
+				//		gendo(opr, 0, 3);	// 执行减法 
+				//		/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+				//		gendo(sto, lev-table[i].level, table[i].adr);
+				//	}
+				//}
+				//else if (sym == timeseq)	// *=运算 
+				//{
+				//	getsymdo;
+				//	memcpy(nxtlev, fsys, sizeof(bool)*symnum);
+				//	expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+				//	if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
+				//	{
+				//		gendo(opr, 0, 4);	// 执行乘法 
+				//		/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+				//		gendo(sto, lev-table[i].level, table[i].adr);
+				//	}
+				//}
+				//else if (sym == slasheq)	// /=运算 
+				//{
+				//	getsymdo;
+				//	memcpy(nxtlev, fsys, sizeof(bool)*symnum);
+				//	expressiondo(nxtlev, ptx, lev); /* 处理赋值符号右侧表达式 */
+				//	if(i != 0)	// 如果不出错，i不等于0，i指向当前语句
+				//	{
+				//		gendo(opr, 0, 5);	// 执行除法 
+				//		/* expression将执行一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值 */
+				//		gendo(sto, lev-table[i].level, table[i].adr);
+				//	}
+				//}
 				else if (sym == plusplus)	// 后++运算 
 				{
 					getsymdo;
@@ -1795,7 +1795,7 @@ void interpret()
 {
 	int p, b, t;    /* 指令指针，指令基址，栈顶指针 */
 	struct instruction i;   /* 存放当前指令 */
-	int s[stacksize];   /* 栈 */
+	float s[stacksize];   /* 栈 */
 
 	printf("start pl0\n");
 	t = 0;
@@ -1839,7 +1839,7 @@ void interpret()
 				s[t-1] = s[t-1]/s[t];
 				break;
 			case 6:
-				s[t-1] = s[t-1]%2;
+				s[t-1] = (int)s[t-1] % 2;
 				break;
 			case 8:
 				t--;
@@ -1866,8 +1866,8 @@ void interpret()
 				s[t-1] = (s[t-1] <= s[t]);
 				break;
 			case 14:
-				printf("%d", s[t-1]);
-				fprintf(fa2, "%d", s[t-1]);
+				printf("%f", s[t-1]);
+				fprintf(fa2, "%f", s[t-1]);
 				t--;
 				break;
 			case 15:
@@ -1877,38 +1877,10 @@ void interpret()
 			case 16:
 				printf("?");
 				fprintf(fa2, "?");
-				scanf("%d", &(s[t]));
-				fprintf(fa2, "%d\n", s[t]);
+				scanf("%f", &(s[t]));
+				fprintf(fa2, "%f\n", s[t]);
 				t++;
 				break;
-			case 17:	// 新增：输出栈顶字符型操作
-                printf("%c\n", s[t-1]);	// 输出栈顶值
-                fprintf(fa2, "%c\n", s[t-1]);	// 同时打印到文件
-                t--;	// 栈顶下移
-                break;
-
-            case 18:	// 新增：输出栈顶浮点值操作
-                printf("%lf", s[t-1]);	// 输出栈顶值
-                fprintf(fa2, "%lf\n", s[t-1]);	// 同时打印到文件
-                t--; // 栈顶下移
-                break;
-
-            case 19:	// 新增：接受键盘值输入到栈顶
-                printf("输入单字符:");
-                fprintf(fa2, "输入单字符:");
-                getchar();	// 消除输入的回车符 
-                scanf("%c", &s[t]);
-                fprintf(fa2, "%c\n", s[t]);
-                t++; // 栈顶上移，分配空间
-                break;
-
-            case 20://20号操作是接受键盘值输入到栈顶
-                printf("输入浮点数：");
-                fprintf(fa2, "输入浮点数：");
-                scanf("%lf", &s[t]);
-                fprintf(fa2, "%lf\n", s[t]);
-                t++; // 栈顶上移，分配空间
-                break;
 			}
 			break;
 		case lod:   /* 取相对当前过程的数据基地址为a的内存的值到栈顶 */
@@ -1944,7 +1916,7 @@ void interpret()
 }
 
 /* 通过过程基址求上l层过程的基址 */
-int base(int l, int* s, int b)
+int base(int l, float* s, int b)
 {
 	int b1;
 	b1 = b;

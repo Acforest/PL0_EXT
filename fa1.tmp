@@ -1,11 +1,11 @@
 Input pl/0 file?   y
-0 var int a, n, i;
+0 var int n, i, f;
 
 1 begin
 
 2     begin
 
-2         a := 1;
+2         f := 1;
 
 4         read(n);
 
@@ -13,12 +13,12 @@ Input pl/0 file?   y
 
 14         begin
 
-14             a := (++a) * 2;	/* included */
+14             f += 2;
 
-22         end;
+17         end;
 
-27         write(a);
+22         write(f);
 
-30     end;
+25     end;
 
-30 end.
+25 end.

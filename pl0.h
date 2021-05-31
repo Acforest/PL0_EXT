@@ -6,10 +6,10 @@
  *
  */
 
-typedef enum {
-    false,
-    true
-} bool;
+//typedef enum {
+//    false,
+//    true
+//} bool;
 
 #define norw 23     /* 保留字个数，从13个增加为23个 */
 #define txmax 100   /* 名字表容量 */
@@ -115,8 +115,7 @@ bool tableswitch;   /* 显示名字表与否 */
 char ch;            /* 获取字符的缓冲区，getch 使用 */
 enum symbol sym;    /* 当前的符号 */
 char id[al+1];      /* 当前ident, 多出的一个字节用于存放0 */
-int num;            /* 当前number */
-float float_num;	/* 新增：当前float number */
+float num;            /* 当前number 新增：支持浮点数 */
 int cc, ll;         /* getch使用的计数器，cc表示当前字符(ch)的位置 */
 int cx;             /* 虚拟机代码指针, 取值范围[0, cxmax-1]*/
 char line[81];      /* 读取行缓冲区 */
@@ -185,7 +184,7 @@ int statement(bool* fsys, int* ptx, int lev);
 void listcode(int cx0);
 int vardeclaration(int* ptx, int lev, int* pdx);
 int constdeclaration(int* ptx, int lev, int* pdx);
-int chardeclaration(int* ptx, int lev, int* pdx);	// 新增 
+int arraydeclaration(int* ptx, int lev, int* pdx);	// 新增 
 int position(char* idt, int tx);
 void enter(enum object k, int* ptx, int lev, int* pdx);
-int base(int l, int* s, int b);
+int base(int l, float* s, int b);
