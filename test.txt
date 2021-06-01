@@ -1,12 +1,14 @@
-var int n, i, f;
+var int n, i;
+var float ff;
 begin
     begin
-        f := 1;
+        ff := 1.2;
         read(n);
         for i := 1 to n do
         begin
-            f--;
+            ff := ff + 1;
         end;
-        write(f);
+        write("ff = %f\n", ff + 1);
+        write("n = %d\n", n);
     end;
 end.

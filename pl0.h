@@ -17,6 +17,7 @@
 #define amax 2047   /* 地址上界*/
 #define levmax 3    /* 最大允许过程嵌套声明层数 [0,  levmax]*/
 #define cxmax 500   /* 最多的虚拟机代码数 */
+#define strmax 100  /* 新增：字符串的最大长度 */
 
 /* 符号 */ 
 // 新增保留字：else, for, to, downto, return
@@ -37,7 +38,7 @@ enum symbol {
 	forsym,    	 tosym,		downtosym,	stepsym,
 	stringsym,	 arraysym,	intsym,		floatsym,
 	pluseq,		 minuseq,	timeseq,	slasheq,   plusplus,	minusminus,
-    lbracket,	 rbracket,	
+    lbracket,	 rbracket,
 };
 
 const char* error_msg[] = {
@@ -66,7 +67,7 @@ const char* error_msg[] = {
     "缺少)",//22
     "因子后有非法符号",//23
     "表达式的开始符为非法符号",//24
-    "",//25
+    "字符串长度超出范围",//25
     "",//26
     "break未写在循环中！",//27
     "for语句缺少step或until!",//28
@@ -78,6 +79,10 @@ const char* error_msg[] = {
     "read()或write()函数调用缺少(",//34
     "read()函数中应是声明过的变量名",//35
     "变量声明不为int或float",//36
+    "格式化输出不是标识符或数字或标识符或数字的数量不足",//37
+    "格式化字符串中%后缺少d或f",//38
+    "格式化输出未知类型",//39
+    "格式化字符串中出现未知转义类型",//40
 };
 
 /* 名字表中的类型 */
@@ -128,15 +133,17 @@ char mnemonic[fctnum][5];   /* 虚拟机代码指令名称 */
 bool declbegsys[symnum];    /* 表示声明开始的符号集合 */
 bool statbegsys[symnum];    /* 表示语句开始的符号集合 */
 bool facbegsys[symnum];     /* 表示因子开始的符号集合 */
-std::string str;			/* 新增：字符串 */ 
+char format_str[strmax]; 	/* 新增：当前的标准化输出字符串 */
+char format_str_total[100][strmax]; 	/* 新增：所有标准化输出字符串 */
+int format_str_size;        /* 新增：标准化输出字符串总数量 */
+int cur_str_ptr;            /* 新增：当前标准化输出字符串的字符指针 */
 
 /* 名字表结构 */
 struct tablestruct
 {
     char name[al];      /* 名字 */
     enum object kind;   /* 类型：const, var, procedure, array or string */
-    int val;            /* 整型数值，仅const使用 */
-    float fval;			/* 新增：浮点型数值，仅const使用 */ 
+    float val;          /* 新增：整型或浮点型数值，仅const使用 */
     int level;          /* 所处层，仅const不使用 */
     int adr;            /* 地址，仅const不使用 */
     int size;           /* 需要分配的数据区空间, 仅procedure使用 */
@@ -168,7 +175,7 @@ void error(int n);
 int getsym();
 int getch();
 void init();
-int gen(enum fct x, int y, int z);
+int gen(enum fct x, int y, float z);
 int test(bool* s1, bool* s2, int n);
 int inset(int e, bool* s);
 int addset(bool* sr, bool* s1, bool* s2, int n);

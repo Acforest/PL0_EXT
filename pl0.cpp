@@ -13,12 +13,11 @@
  * fa2.tmp输出结?
  * fas.tmp输出名字表
  */
-
-#include <stdio.h>
+#pragma once
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 #include "pl0.h"
-#include "string.h"
 #pragma warning(disable:4996)
 
 /* 解释执行时使用的栈 */
@@ -201,7 +200,7 @@ void init()
 	declbegsys[constsym] = true;
 	declbegsys[varsym] = true;
 	declbegsys[procsym] = true;
-	declbegsys[stringsym] = true;	// 新增声明开始符号 stringsym 
+	//declbegsys[stringsym] = true;	// 新增声明开始符号 stringsym 
 	declbegsys[arraysym] = true;	// 新增声明开始符号 arraysym 
 
 	/* 设置语句开始符号集 */
@@ -272,8 +271,8 @@ void error(int n)
 
 	space[cc-1]=0; //出错时当前符号已经读完，所以cc-1
 
-	printf("%s!%s: %d\n", space, n, error_msg[n]);
-	fprintf(fa1,"%s!%s: %d\n", space, n, error_msg[n]);
+	printf("%s!%d: %s\n", space, n, error_msg[n]);
+	fprintf(fa1,"%s!%d: %s\n", space, n, error_msg[n]);
 
 	err++;
 }
@@ -383,7 +382,7 @@ int getsym()
 			} while (ch>='0' && ch<='9'); /* 获取数字的值 */
 			if (ch == '.') // 新增：判断浮点数
 			{
-				sym = floatsym;
+				//sym = floatsym;
 				getchdo;
 				float tmp = 0.1f;
 				while (ch >= '0' && ch <= '9')
@@ -394,10 +393,10 @@ int getsym()
 					getchdo;
 				}
 			}
-			//else { // 否则识别为整型数
-			//	sym = intsym;
-			//}
-			//k--;
+//			else { // 否则识别为整型数
+//				sym = intsym;
+//			}
+			k--;
 			if (k > nmax && sym == intsym) // 如果整型变量超出范围
 			{
 				error(30);
@@ -529,14 +528,21 @@ int getsym()
 							sym = slash;	// 检测到 / 号 
 						}
 					}
-					else if (ch == '"')	// 新增：检测到字符串 
+					else if (ch == '"')	// 新增：检测到字符串
 					{
+						sym = stringsym;
 						getchdo;
 						k = 0;
-						while (ch != '"')
+						memset(format_str, '\0', sizeof format_str);
+						while (ch != '"')	// 如果没有读到双引号
 						{
-							str += ch;
+							format_str[k++] = ch;
 							getchdo;
+							if (k > strmax)
+							{
+								error(25);
+								break;
+							}
 						}
 						getchdo;
 					}
@@ -562,7 +568,7 @@ int getsym()
 * y: instruction.l;
 * z: instruction.a;
 */
-int gen(enum fct x, int y, int z)
+int gen(enum fct x, int y, float z)
 {
 	if (cx >= cxmax)
 	{
@@ -1334,28 +1340,123 @@ int statement(bool* fsys, int* ptx, int lev)
 		{
 			if (sym == writesym)    /* 准备按照write语句处理，与read类似 */
 			{
-				getsymdo;
-				if (sym == lparen)
+				getsymdo; // 读出一个符号
+				if (sym == lparen) // 如果是左括号
 				{
-					// 新增：字符串格式化使出
-					do {
-						getsymdo;
-						memcpy(nxtlev, fsys, sizeof(bool)*symnum);
-						nxtlev[rparen] = true;
-						nxtlev[comma] = true;       /* write的后跟符号为) or , */
-						expressiondo(nxtlev, ptx, lev); /* 调用表达式处理，此处与read不同，read为给变量赋值 */
-						gendo(opr, 0, 14);  /* 变量输出，生成输出指令，输出栈顶的值 */
-					} while (sym == comma);
-					if (sym != rparen)
+					// 新增：字符串格式化输出
+					getsymdo; // 读出左括号右边的内容
+					if (sym == stringsym) // 如果左括号后的第一个参数为字符串，则进行格式化输出
 					{
-						error(33);  /* write()中应为完整表达式 */
+						getsymdo;	// 读出逗号或右括号
+						char tmp_str[strmax];
+						memset(tmp_str, '\0', sizeof tmp_str);
+						int tmp_str_idx = 0;
+						int str_size = strlen(format_str);
+						for (int it = 0; it < str_size; it++)
+						{
+							if (format_str[it] == '%') // 读到格式化字符串中的%
+							{
+								if (tmp_str[0] != '\0')
+								{
+									gendo(opr, 0, 19);
+									strcpy(format_str_total[format_str_size++], tmp_str);
+									memset(tmp_str, '\0', sizeof tmp_str);
+									tmp_str_idx = 0;
+								}
+								getsymdo; // 读入逗号后的标识符或数字
+								if (sym != ident && sym != number)
+								{
+									error(37); // 格式化输出不是标识符或数字 或 标识符或数字的数量不足
+								}
+								memcpy(nxtlev, fsys, sizeof(bool)* symnum);
+								nxtlev[rparen] = true;
+								nxtlev[comma] = true;       /* write的后跟符号为)或, */
+								expressiondo(nxtlev, ptx, lev); /* 调用表达式处理，此处与read不同，read为给变量赋值 */
+								it++; // 再向后读一个格式化字符串中的字符
+								if (it < str_size)
+								{
+									if (format_str[it] == 'd')	// 输出整型数
+									{
+										gendo(opr, 0, 14);
+									}
+									else if (format_str[it] == 'f')	// 输出浮点数
+									{
+										gendo(opr, 0, 17);
+									}
+									else
+									{
+										error(39); // 格式化输出未知类型
+									}
+								}
+								else
+								{
+									error(38); // %后缺少d或f
+								}
+							}
+							else if (format_str[it] == '\\') // 读到格式化字符串中的反斜杠（转义字符）
+							{
+								it++; // 再向后读一个格式化字符串中的字符
+								if (it < strlen(format_str))
+								{
+									if (format_str[it] == 'n')	// 读到回车换行
+									{
+										gendo(opr, 0, 15);  /* 输出换行 */
+									}
+									else if (format_str[it] == 't') // 读到制表符
+									{
+										gendo(opr, 0, 18);  /* 输出制表符 */
+									}
+									else
+									{
+										error(40); // 格式化字符串中出现未知转义类型
+									}
+								}
+							}
+							else // 普通字符
+							{
+								tmp_str[tmp_str_idx++] = format_str[it]; /* 输出单个字符 */
+							}
+						}
+						if (sym != rparen)
+						{
+							error(33);  /* write()中应为完整表达式 */
+						}
+						else
+						{
+							getsymdo;
+						}
+						if (tmp_str[0] != '\0')
+						{
+							gendo(opr, 0, 19);
+							strcpy(format_str_total[format_str_size++], tmp_str);
+							memset(tmp_str, '\0', sizeof tmp_str);
+							tmp_str_idx = 0;
+						}
 					}
-					else
+					else  // 输出一般的标识符
 					{
-						getsymdo;
+						do {
+							if (sym == comma)
+							{
+								getchdo;
+							}
+							memcpy(nxtlev, fsys, sizeof(bool) * symnum);
+							nxtlev[rparen] = true;
+							nxtlev[comma] = true;       /* write的后跟符号为) or , */
+							expressiondo(nxtlev, ptx, lev); /* 调用表达式处理，此处与read不同，read为给变量赋值 */
+							gendo(opr, 0, 14);  /* 变量输出，生成输出指令，输出栈顶的值 */
+						} while (sym == comma);
+						if (sym != rparen)
+						{
+							error(33);  /* write()中应为完整表达式 */
+						}
+						else
+						{
+							getsymdo;
+						}
 					}
 				}
-				gendo(opr, 0, 15);  /* 输出换行 */
+				// gendo(opr, 0, 15);  /* 输出换行 */
 			}
 			else
 			{
@@ -1797,8 +1898,8 @@ void interpret()
 		p++;
 		switch (i.f)
 		{
-		case lit:   /* 将a的值取到栈顶 */
-			s[t] = i.a;
+		case lit:   /* 改进：将a的值取到栈顶，可以为浮点数 */
+			s[t] = (float)i.a;
 			t++;
 			break;
 		case opr:   /* 数学、逻辑运算 */
@@ -1855,9 +1956,9 @@ void interpret()
 				t--;
 				s[t-1] = (s[t-1] <= s[t]);
 				break;
-			case 14:
-				printf("%f", s[t-1]);
-				fprintf(fa2, "%f", s[t-1]);
+			case 14:	// 输出整型数
+				printf("%d", (int)s[t-1]);
+				fprintf(fa2, "%d", (int)s[t-1]);
 				t--;
 				break;
 			case 15:
@@ -1871,10 +1972,24 @@ void interpret()
 				fprintf(fa2, "%f\n", s[t]);
 				t++;
 				break;
+			case 17:	// 新增：输出浮点数
+				printf("%f", s[t - 1]);
+				fprintf(fa2, "%f", s[t - 1]);
+				t--;
+				break;
+			case 18:	// 新增：输出制表符
+				printf("\t");
+				fprintf(fa2, "\t");
+				break;
+			case 19:	// 新增：输出单个字符
+				printf("%s", format_str_total[cur_str_ptr]);
+				fprintf(fa2, "%s", format_str_total[cur_str_ptr]);
+				cur_str_ptr++;
+				break;
 			}
 			break;
 		case lod:   /* 取相对当前过程的数据基地址为a的内存的值到栈顶 */
-			s[t] = s[base(i.l,s,b)+i.a];
+			s[t] = s[base(i.l, s, b) + i.a];
 			t++;
 			break;
 		case sto:   /* 栈顶的值存到相对当前过程的数据基地址为a的内存 */

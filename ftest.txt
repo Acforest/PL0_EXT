@@ -2,12 +2,9 @@ var int n, i;
 var float f;
 begin
     begin
-        f := 1;
+        f := 3.2;
         read(n);
-        for i := 1 to n do
-        begin
-            f++;
-        end;
-        write(f);
+        write("f = %f\n", f);
+        write("n = %d\n", n);
     end;
 end.
