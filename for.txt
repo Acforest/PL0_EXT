@@ -1,0 +1,11 @@
+var int n, i;
+begin
+    begin
+        write("please input an integer: ");
+        read(n);
+        for i := 1 to n do
+        begin
+            write("i = %d\n", i);
+        end;
+    end;
+end.

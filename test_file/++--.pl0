@@ -1,0 +1,10 @@
+var float f;
+begin
+    begin
+        read(f);
+        f++;
+        write("f++ = %f\n", f);
+        f--;
+        write("f-- = %f\n", f);
+    end;
+end.

@@ -1,0 +1,14 @@
+var float f;
+begin
+    begin
+        f := 1.0;
+        f++;
+        write("f++ = %f\n", f);
+        f--;
+        write("f-- = %f\n", f);
+        f *= 2;
+        write("f *= 2 = %f\n", f);
+        f /= 2;
+        write("f /= 2 = %f\n", f);
+    end;
+end.

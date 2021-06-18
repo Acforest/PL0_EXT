@@ -108,7 +108,7 @@ struct instruction
 {
     enum fct f; /* 虚拟机代码指令 */
     int l;      /* 引用层与声明层的层次差 */
-    int a;      /* 根据f的不同而不同 */
+    float a;    /* 根据f的不同而不同 */
 };
 
 FILE* fas;  /* 输出名字表 */
@@ -120,7 +120,7 @@ bool tableswitch;   /* 显示名字表与否 */
 char ch;            /* 获取字符的缓冲区，getch 使用 */
 enum symbol sym;    /* 当前的符号 */
 char id[al+1];      /* 当前ident, 多出的一个字节用于存放0 */
-float num;            /* 当前number 新增：支持浮点数 */
+float num;          /* 当前number 新增：支持浮点数 */
 int cc, ll;         /* getch使用的计数器，cc表示当前字符(ch)的位置 */
 int cx;             /* 虚拟机代码指针, 取值范围[0, cxmax-1]*/
 char line[81];      /* 读取行缓冲区 */
@@ -134,9 +134,6 @@ bool declbegsys[symnum];    /* 表示声明开始的符号集合 */
 bool statbegsys[symnum];    /* 表示语句开始的符号集合 */
 bool facbegsys[symnum];     /* 表示因子开始的符号集合 */
 char format_str[strmax]; 	/* 新增：当前的标准化输出字符串 */
-char format_str_total[100][strmax]; 	/* 新增：所有标准化输出字符串 */
-int format_str_size;        /* 新增：标准化输出字符串总数量 */
-int cur_str_ptr;            /* 新增：当前标准化输出字符串的字符指针 */
 
 /* 名字表结构 */
 struct tablestruct
@@ -147,7 +144,7 @@ struct tablestruct
     int level;          /* 所处层，仅const不使用 */
     int adr;            /* 地址，仅const不使用 */
     int size;           /* 需要分配的数据区空间, 仅procedure使用 */
-    int type;			/* 新增：数值类型，整型数为 0，浮点数为 1 */ 
+    char type[10];		/* 新增：数值类型，整型数为int，浮点数为float */
 };
 
 struct tablestruct table[txmax]; /* 名字表 */
@@ -169,7 +166,7 @@ int err; /* 错误计数器 */
 #define statementdo(a, b, c)          if(-1 == statement(a, b, c)) return -1
 #define constdeclarationdo(a, b, c)   if(-1 == constdeclaration(a, b, c)) return -1
 #define vardeclarationdo(a, b, c)     if(-1 == vardeclaration(a, b, c)) return -1
-#define arraydeclarationdo(a, b, c)     if(-1 == arraydeclaration(a, b, c)) return -1		// 新增 
+#define arraydeclarationdo(a, b, c)   if(-1 == arraydeclaration(a, b, c)) return -1		// 新增 
 
 void error(int n);
 int getsym();
